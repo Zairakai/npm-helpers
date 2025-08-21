@@ -2,18 +2,18 @@
  * String manipulation and formatting utilities
  */
 
-export const capitalize = value => {
+export const capitalize = (value) => {
     if (!value) {
-        return ''
+        return '';
     }
 
-    value = String(value)
-    return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
-}
+    value = String(value);
+    return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+};
 
-export const slugify = text => {
+export const slugify = (text) => {
     if (!text) {
-        return ''
+        return '';
     }
 
     return text
@@ -24,27 +24,27 @@ export const slugify = text => {
         .trim()
         .replace(/\s+/g, '-')
         .replace(/[^\w-]+/g, '')
-        .replace(/--+/g, '-')
-}
+        .replace(/--+/g, '-');
+};
 
 export const strLimit = (value, size) => {
     if (!value) {
-        return ''
+        return '';
     }
 
-    value = String(value)
-    return value.length <= size ? value : `${value.slice(0, size)}…`
-}
+    value = String(value);
+    return value.length <= size ? value : `${value.slice(0, size)}…`;
+};
 
-export const normalizeString = value => {
-    if (!value) return value
+export const normalizeString = (value) => {
+    if (!value) return value;
 
     return value
         .trim()
         .toLowerCase()
         .normalize('NFC')
-        .replace(/\p{Diacritic}/gu, '')
-}
+        .replace(/\p{Diacritic}/gu, '');
+};
 
 /**
  * Format a number with locale-specific formatting
@@ -57,5 +57,5 @@ export const numberFormat = (value, decimals = 2, locale = 'en-US') => {
     return new Intl.NumberFormat(locale, {
         minimumFractionDigits: decimals,
         maximumFractionDigits: decimals,
-    }).format(value)
-}
+    }).format(value);
+};

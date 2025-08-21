@@ -1,70 +1,72 @@
 {
-  "name": "@zairakai/helpers",
-  "version": "1.0.0",
-  "description": "Collection of JavaScript utility functions for string manipulation, validation, and formatting",
-  "keywords": [
-    "javascript",
-    "utilities",
-    "helpers",
-    "validation",
-    "formatters",
-    "laravel-like"
-  ],
-  "homepage": "https://gitlab.com/zairakai/npm/helpers",
-  "bugs": {
-    "email": "contact-project+zairakai-npm-helpers-issue-@incoming.gitlab.com"
-  },
-  "license": "MIT",
-  "author": {
-    "name": "Stanislas Poisson",
-    "nickname": "Zairakai"
-  },
-  "files": [
-    "src",
-    "dist"
-  ],
-  "exports": {
-    ".": {
-      "import": "./src/index.js",
-      "require": "./dist/index.cjs"
+    "name": "@zairakai/helpers",
+    "version": "1.0.0",
+    "description": "Collection of JavaScript utility functions for string manipulation, validation, and formatting",
+    "keywords": [
+        "javascript",
+        "utilities",
+        "helpers",
+        "validation",
+        "formatters",
+        "laravel-like"
+    ],
+    "homepage": "https://gitlab.com/zairakai/npm/helpers",
+    "bugs": {
+        "email": "contact-project+zairakai-npm-helpers-issue-@incoming.gitlab.com"
     },
-    "./validators": {
-      "import": "./src/validators.js",
-      "require": "./dist/validators.cjs"
+    "license": "MIT",
+    "author": {
+        "name": "Stanislas Poisson",
+        "nickname": "Zairakai"
     },
-    "./formatters": {
-      "import": "./src/formatters.js",
-      "require": "./dist/formatters.cjs"
+    "files": [
+        "src",
+        "dist"
+    ],
+    "exports": {
+        ".": {
+            "import": "./src/index.js",
+            "require": "./dist/index.cjs"
+        },
+        "./validators": {
+            "import": "./src/validators.js",
+            "require": "./dist/validators.cjs"
+        },
+        "./formatters": {
+            "import": "./src/formatters.js",
+            "require": "./dist/formatters.cjs"
+        },
+        "./datetime": {
+            "import": "./src/datetime.js",
+            "require": "./dist/datetime.cjs"
+        }
     },
-    "./datetime": {
-      "import": "./src/datetime.js",
-      "require": "./dist/datetime.cjs"
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://gitlab.com/zairakai/npm/helpers.git"
-  },
-  "scripts": {
-    "build": "rollup -c",
-    "test": "vitest",
-    "test:coverage": "vitest --coverage",
-    "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix",
-    "pretty": "prettier --check 'src/**/*.js' 'package.json'",
-    "pretty:fix": "prettier --write 'src/**/*.js' 'package.json'"
-  },
-  "dependencies": {
-    "dayjs": "^1.11.13"
-  },
-  "devDependencies": {
-    "eslint": "^9.17.0",
-    "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.4.2",
-    "rollup": "^4.0.0",
-    "@rollup/plugin-node-resolve": "^15.0.0",
-    "vitest": "^2.0.0",
-    "@vitest/coverage-v8": "^2.0.0"
-  },
-  "type": "module"
+    "repository": {
+        "type": "git",
+        "url": "https://gitlab.com/zairakai/npm/helpers.git"
+    },
+    "scripts": {
+        "build": "rollup -c",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage",
+        "lint": "eslint src/",
+        "lint:fix": "eslint src/ --fix",
+        "format": "prettier --write .",
+        "check": "prettier --check .",
+        "all": "npm run lint && npm run check",
+        "all:fix": "npm run lint:fix && npm run format"
+    },
+    "dependencies": {
+        "dayjs": "^1.11.13"
+    },
+    "devDependencies": {
+        "eslint": "^9.17.0",
+        "eslint-config-prettier": "^9.1.0",
+        "prettier": "^3.4.2",
+        "rollup": "^4.0.0",
+        "@rollup/plugin-node-resolve": "^15.0.0",
+        "vitest": "^2.0.0",
+        "@vitest/coverage-v8": "^2.0.0"
+    },
+    "type": "module"
 }
