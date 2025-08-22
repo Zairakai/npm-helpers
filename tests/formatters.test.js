@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { capitalize, slugify, strLimit, normalizeString, numberFormat } from '../src/formatters.js';
+import { capitalize, slugify, strLimit, normalizeString, numberFormat } from '../src/formatters.ts';
 
 describe('capitalize', () => {
     it('should capitalize the first letter and lowercase the rest', () => {

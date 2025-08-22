@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 // Test main exports
 describe('main exports', () => {
     it('should export all validators', async () => {
-        const validators = await import('../src/validators.js');
+        const validators = await import('../src/validators.ts');
         
         // Basic type checking
         expect(validators.isTrue).toBeDefined();
@@ -36,7 +36,7 @@ describe('main exports', () => {
     });
 
     it('should export all formatters', async () => {
-        const formatters = await import('../src/formatters.js');
+        const formatters = await import('../src/formatters.ts');
         
         expect(formatters.capitalize).toBeDefined();
         expect(formatters.slugify).toBeDefined();
@@ -46,7 +46,7 @@ describe('main exports', () => {
     });
 
     it('should export all datetime utilities', async () => {
-        const datetime = await import('../src/datetime.js');
+        const datetime = await import('../src/datetime.ts');
         
         expect(datetime.dayjs).toBeDefined();
         expect(datetime.now).toBeDefined();
@@ -61,7 +61,7 @@ describe('main exports', () => {
     });
 
     it('should export main index file', async () => {
-        const mainExports = await import('../src/index.js');
+        const mainExports = await import('../src/index.ts');
         
         // Should re-export all functions from submodules
         expect(Object.keys(mainExports).length).toBeGreaterThan(0);

@@ -4,7 +4,7 @@ import {
     isArray, isObject, isString, isNumber, isInteger, isFloat,
     isBoolean, isFunction, isDate, isNumeric, isEmail, isUrl,
     isEmpty, isNotEmpty, isBlank, isPresent, filled, blank
-} from '../src/validators.js';
+} from '../src/validators.ts';
 
 describe('Basic type checking', () => {
     it('should validate true values correctly', () => {

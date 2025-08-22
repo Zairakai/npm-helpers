@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
     dayjs, now, today, tomorrow, yesterday,
     isBetweenDates, fromNow, isToday, isPast, isFuture
-} from '../src/datetime.js';
+} from '../src/datetime.ts';
 
 describe('dayjs instance', () => {
     it('should export configured dayjs instance', () => {
