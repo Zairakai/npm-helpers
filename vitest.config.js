@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
@@ -14,16 +14,16 @@ export default defineConfig({
         'vitest.config.js',
         'eslint.config.js',
         'prettier.config.js',
-        'rollup.config.js'
+        'rollup.config.js',
       ],
       thresholds: {
         global: {
           branches: 80,
           functions: 80,
           lines: 80,
-          statements: 80
-        }
-      }
-    }
-  }
-});
+          statements: 80,
+        },
+      },
+    },
+  },
+})

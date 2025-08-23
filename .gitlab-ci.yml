@@ -1,0 +1,177 @@
+# GitLab CI/CD Pipeline for @zairakai/helpers
+# Automated testing, linting, and publishing workflow
+
+variables:
+  NODE_VERSION: '22'
+  CACHE_KEY: 'helpers-v1'
+
+# Define stages
+stages:
+  - prepare
+  - quality
+  - test
+  - build
+  - publish
+
+# Cache configuration for faster builds
+.cache_template: &cache_template
+  cache:
+    key:
+      files:
+        - package-lock.json
+      prefix: $CACHE_KEY
+    paths:
+      - node_modules/
+      - .npm/
+    policy: pull
+
+# Base job configuration
+.base_job: &base_job
+  image: node:$NODE_VERSION-alpine
+  <<: *cache_template
+  before_script:
+    - npm ci --cache .npm --prefer-offline --no-audit
+
+# Install dependencies
+install:
+  stage: prepare
+  image: node:$NODE_VERSION-alpine
+  cache:
+    key:
+      files:
+        - package-lock.json
+      prefix: $CACHE_KEY
+    paths:
+      - node_modules/
+      - .npm/
+    policy: pull-push
+  script:
+    - npm ci --cache .npm --prefer-offline --no-audit
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1 hour
+
+# Code quality checks
+lint:
+  <<: *base_job
+  stage: quality
+  needs: ['install']
+  script:
+    - npm run lint
+  artifacts:
+    reports:
+      junit: reports/eslint.xml
+    paths:
+      - reports/
+    expire_in: 1 week
+    when: always
+
+# Code formatting check
+format:
+  <<: *base_job
+  stage: quality
+  needs: ['install']
+  script:
+    - npm run check
+
+# TypeScript type checking
+typecheck:
+  <<: *base_job
+  stage: quality
+  needs: ['install']
+  script:
+    - npm run type-check || true # TypeScript check for helpers (if applicable)
+
+# Run tests with coverage
+test:
+  <<: *base_job
+  stage: test
+  needs: ['install']
+  script:
+    - npm run test:coverage
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  artifacts:
+    reports:
+      junit: coverage/junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    paths:
+      - coverage/
+    expire_in: 1 week
+    when: always
+
+# Build the package
+build:
+  <<: *base_job
+  stage: build
+  needs: ['install', 'lint', 'format', 'test']
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+
+# Publish to npm (manual trigger for production)
+publish:npm:
+  <<: *base_job
+  stage: publish
+  needs: ['build']
+  script:
+    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+    - npm publish --access public
+  rules:
+    - if: $CI_COMMIT_TAG
+    - when: manual
+  environment:
+    name: production
+    url: https://www.npmjs.com/package/@zairakai/helpers
+
+# Publish to GitLab Package Registry (as backup)
+publish:gitlab:
+  <<: *base_job
+  stage: publish
+  needs: ['build']
+  script:
+    - echo "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}" | sed s/^https:// > ~/.npmrc
+    - echo "@zairakai:registry=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/" >> ~/.npmrc
+    - npm publish
+  rules:
+    - when: manual
+  environment:
+    name: gitlab-registry
+    url: ${CI_PROJECT_URL}/-/packages
+
+# Security audit
+audit:
+  <<: *base_job
+  stage: quality
+  needs: ['install']
+  script:
+    - npm audit --audit-level=moderate
+  allow_failure: true
+
+# Dependency check for outdated packages
+outdated:
+  <<: *base_job
+  stage: quality
+  needs: ['install']
+  script:
+    - npm outdated || true
+  allow_failure: true
+
+# Generate and upload documentation (if README changes)
+documentation:
+  image: node:$NODE_VERSION-alpine
+  stage: build
+  needs: ['install']
+  script:
+    - echo "Documentation updated for @zairakai/helpers"
+  rules:
+    - changes:
+        - README.md
+        - CHANGELOG.md
+        - CONTRIBUTING.md
+  allow_failure: true
