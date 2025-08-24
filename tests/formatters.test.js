@@ -133,7 +133,7 @@ describe('numberFormat', () => {
   })
 
   it('should format numbers with different locales', () => {
-    expect(numberFormat(1234.56, 2, 'fr-FR')).toBe('1 234,56')
+    expect(numberFormat(1234.56, 2, 'fr-FR')).toBe('1\u202F234,56')
     expect(numberFormat(1234.56, 2, 'de-DE')).toBe('1.234,56')
     expect(numberFormat(1234.56, 2, 'en-US')).toBe('1,234.56')
   })

@@ -160,7 +160,7 @@ jobs:
         with:
           file: ./coverage/cobertura-coverage.xml
           flags: unittests
-          name: @zairakai/helpers
+          name: "@zairakai/helpers"
 
   # Security audit
   audit:

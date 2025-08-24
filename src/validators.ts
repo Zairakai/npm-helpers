@@ -27,7 +27,7 @@ export const isDate = (value: unknown): value is Date =>
 // Advanced validation
 export const isNumeric = (value: unknown): value is number | string => {
   if ('number' === typeof value) {
-    return !isNaN(value)
+    return !isNaN(value) && isFinite(value)
   }
   if ('string' === typeof value) {
     const num = parseFloat(value)

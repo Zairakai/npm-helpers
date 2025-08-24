@@ -7,12 +7,14 @@ import isBetween from 'dayjs/plugin/isBetween'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import utc from 'dayjs/plugin/utc'
 
 // Configure dayjs with commonly used plugins
 dayjsModule.extend(isBetween)
 dayjsModule.extend(isSameOrAfter)
 dayjsModule.extend(isSameOrBefore)
 dayjsModule.extend(relativeTime)
+dayjsModule.extend(utc)
 
 // Export configured dayjs instance
 export const dayjs = dayjsModule

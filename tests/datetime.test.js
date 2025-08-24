@@ -50,7 +50,7 @@ describe('date utility functions', () => {
 
   it('should return current moment with now()', () => {
     const currentMoment = now()
-    expect(currentMoment.format('YYYY-MM-DD HH:mm')).toBe('2023-06-15 12:00')
+    expect(currentMoment.utc().format('YYYY-MM-DD HH:mm')).toBe('2023-06-15 12:00')
   })
 
   it('should return today start of day with today()', () => {

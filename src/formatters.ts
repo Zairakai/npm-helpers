@@ -3,7 +3,7 @@
  */
 
 export const capitalize = (value: unknown): string => {
-  if (!value) {
+  if (null == value || undefined === value) {
     return ''
   }
 
@@ -44,8 +44,8 @@ export const normalizeString = (value: string | null | undefined): string | null
   return value
     .trim()
     .toLowerCase()
-    .normalize('NFC')
-    .replace(/\p{Diacritic}/gu, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
 }
 
 /**
