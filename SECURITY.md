@@ -8,11 +8,11 @@
 
 ## Reporting a Vulnerability
 
-We take the security of @zairakai/helpers seriously. If you discover a security vulnerability, please report it responsibly.
+We take the security of @zairakai/npm-helpers seriously. If you discover a security vulnerability, please report it responsibly.
 
 **Please do NOT report security vulnerabilities through public GitHub/GitLab issues.**
 
-Instead, please report them via email to: **contact-project+zairakai-npm-helpers-issue-@incoming.gitlab.com**
+Instead, please report them via email to: **contact-project+zairakai-npm-helpers-73530494-issue-@incoming.gitlab.com**
 
 ### What to include in your report:
 
@@ -47,8 +47,8 @@ Instead, please report them via email to: **contact-project+zairakai-npm-helpers
 
 ## Security contact
 
-For security concerns, contact: **contact-project+zairakai-npm-helpers-issue-@incoming.gitlab.com**
+For security concerns, contact: **contact-project+zairakai-npm-helpers-73530494-issue-@incoming.gitlab.com**
 
 ---
 
-Thank you for helping to keep @zairakai/helpers secure!
+Thank you for helping to keep @zairakai/npm-helpers secure!

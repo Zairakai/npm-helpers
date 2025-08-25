@@ -1,6 +1,6 @@
-# Developing @zairakai/helpers
+# Developing @zairakai/npm-helpers
 
-This document provides information for developers working on the @zairakai/helpers library.
+This document provides information for developers working on the @zairakai/npm-helpers library.
 
 ## Setup
 

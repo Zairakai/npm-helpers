@@ -1,13 +1,22 @@
-# @zairakai/helpers
+# @zairakai/npm-helpers
+
+[![npm version](https://badge.fury.io/js/@zairakai%2Fhelpers.svg)](https://badge.fury.io/js/@zairakai%2Fhelpers)
+[![Pipeline Status - Main](https://gitlab.com/zairakai/npm/helpers/badges/main/pipeline.svg)](https://gitlab.com/zairakai/npm/helpers/-/commits/main)
+[![Pipeline Status - Develop](https://gitlab.com/zairakai/npm/helpers/badges/develop/pipeline.svg)](https://gitlab.com/zairakai/npm/helpers/-/commits/develop)
+[![Coverage Report](https://gitlab.com/zairakai/npm/helpers/badges/develop/coverage.svg)](https://gitlab.com/zairakai/npm/helpers/-/commits/develop)
+[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-22+-green.svg)](https://nodejs.org/)
+[![Yarn](https://img.shields.io/badge/Yarn-1.22+-blue.svg)](https://yarnpkg.com/)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 
 Collection of JavaScript utility functions for string manipulation, validation, and formatting. Framework-agnostic and inspired by Laravel's helper functions.
 
 ## Installation
 
 ```bash
-npm install @zairakai/helpers
+npm install @zairakai/npm-helpers
 # or
-yarn add @zairakai/helpers
+yarn add @zairakai/npm-helpers
 ```
 
 ## Usage

@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial release of @zairakai/helpers
+- Initial release of @zairakai/npm-helpers
 - **Validators module** with comprehensive type checking functions:
   - Basic type validation (isString, isNumber, isArray, etc.)
   - Content validation (isEmpty, isBlank, isPresent, etc.)
@@ -58,9 +58,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Installation
 
 ```bash
-npm install @zairakai/helpers
+npm install @zairakai/npm-helpers
 # or
-yarn add @zairakai/helpers
+yarn add @zairakai/npm-helpers
 ```
 
 ### Usage Examples

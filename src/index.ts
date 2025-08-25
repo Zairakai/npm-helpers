@@ -1,5 +1,5 @@
 /**
- * @zairakai/helpers
+ * @zairakai/npm-helpers
  * Collection of JavaScript utility functions
  */
 

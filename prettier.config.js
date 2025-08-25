@@ -1,5 +1,5 @@
 /**
- * Prettier configuration for @zairakai/helpers
+ * Prettier configuration for @zairakai/npm-helpers
  * TypeScript utility library formatting
  * @type {import("prettier").Config}
  */

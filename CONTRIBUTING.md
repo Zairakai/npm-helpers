@@ -1,6 +1,6 @@
-# Contributing to @zairakai/helpers
+# Contributing to @zairakai/npm-helpers
 
-We welcome contributions to the @zairakai/helpers utility library! This document provides guidelines for contributing to this project.
+We welcome contributions to the @zairakai/npm-helpers utility library! This document provides guidelines for contributing to this project.
 
 ## Before Contributing
 
@@ -207,4 +207,4 @@ Contributors will be recognized in:
 - README.md contributors section
 - Release notes for major features
 
-Thank you for contributing to @zairakai/helpers! 🚀
+Thank you for contributing to @zairakai/npm-helpers! 🚀

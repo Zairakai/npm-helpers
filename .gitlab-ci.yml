@@ -1,17 +1,26 @@
-# GitLab CI/CD Pipeline for @zairakai/helpers
-# Automated testing, linting, and publishing workflow
+# GitLab CI/CD Pipeline for @zairakai/npm-helpers
+# JavaScript utilities with security scanning, bundle monitoring, GitHub sync, auto-versioning
 
 variables:
-  NODE_VERSION: '22'
-  CACHE_KEY: 'helpers-v1'
+  NODE_VERSION: "22"
+  CACHE_KEY: "helpers-v1"
 
 # Define stages
 stages:
   - prepare
   - quality
+  - security
   - test
   - build
+  - metrics
   - publish
+  - deploy
+
+# Include GitLab security scanning templates
+include:
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+  - template: Jobs/SAST.gitlab-ci.yml
 
 # Cache configuration for faster builds
 .cache_template: &cache_template
@@ -56,7 +65,7 @@ install:
 lint:
   <<: *base_job
   stage: quality
-  needs: ['install']
+  needs: ["install"]
   script:
     - yarn lint
   artifacts:
@@ -71,7 +80,7 @@ lint:
 format:
   <<: *base_job
   stage: quality
-  needs: ['install']
+  needs: ["install"]
   script:
     - yarn check
 
@@ -79,7 +88,7 @@ format:
 typecheck:
   <<: *base_job
   stage: quality
-  needs: ['install']
+  needs: ["install"]
   script:
     - yarn type-check || true # TypeScript check for helpers (if applicable)
 
@@ -87,7 +96,7 @@ typecheck:
 test:
   <<: *base_job
   stage: test
-  needs: ['install']
+  needs: ["install"]
   script:
     - yarn test:coverage
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
@@ -106,7 +115,7 @@ test:
 build:
   <<: *base_job
   stage: build
-  needs: ['install', 'lint', 'format', 'test']
+  needs: ["install", "lint", "format", "test"]
   script:
     - yarn build
   artifacts:
@@ -114,26 +123,158 @@ build:
       - dist/
     expire_in: 1 week
 
-# Publish to npm (manual trigger for production)
+# Security audit (informational only - dev dependencies vulnerabilities expected)
+audit:
+  <<: *base_job
+  stage: security
+  needs: ["install"]
+  script:
+    - yarn audit --level moderate
+  allow_failure: true
+
+# Dependency check for outdated packages
+outdated:
+  <<: *base_job
+  stage: security
+  needs: ["install"]
+  script:
+    - yarn outdated || true
+  allow_failure: true
+
+# Bundle size monitoring
+bundle:size:
+  <<: *base_job
+  stage: metrics
+  needs: ["build"]
+  script:
+    - yarn build
+    - |
+      BUNDLE_PATH="dist/"
+      BUNDLE_SIZE=$(du -sb $BUNDLE_PATH | cut -f1)
+      BUNDLE_SIZE_KB=$((BUNDLE_SIZE / 1024))
+      echo "Bundle size: ${BUNDLE_SIZE_KB}KB"
+      echo "bundle_size_kb ${BUNDLE_SIZE_KB}" > metrics.txt
+      # Add to job summary
+      echo "📦 **Bundle Size**: ${BUNDLE_SIZE_KB}KB" >> bundle_report.md
+  artifacts:
+    reports:
+      metrics: metrics.txt
+    paths:
+      - bundle_report.md
+      - dist/
+    expire_in: 1 week
+  rules:
+    - if: $CI_COMMIT_TAG
+      variables:
+        BUNDLE_TAG: "true"
+    - when: always
+
+# Automatic version publishing from tags
+publish:tag:
+  <<: *base_job
+  stage: publish
+  needs: ["build", "bundle:size"]
+  script:
+    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+    # Generate CHANGELOG entry automatically
+    - |
+      echo "🔄 Generating CHANGELOG entry for ${CI_COMMIT_TAG}..."
+      PREVIOUS_TAG=$(git tag --sort=-version:refname | head -n 2 | tail -n 1 || echo "")
+      
+      if [[ -n "$PREVIOUS_TAG" && "$PREVIOUS_TAG" != "$CI_COMMIT_TAG" ]]; then
+        echo "📝 Generating changelog from $PREVIOUS_TAG to $CI_COMMIT_TAG"
+        
+        # Create changelog entry
+        echo "## [${CI_COMMIT_TAG#v}] - $(date +%Y-%m-%d)" > changelog_entry.md
+        echo "" >> changelog_entry.md
+        
+        # Get categorized commits
+        ADDED_COMMITS=$(git log --pretty=format:"- %s" "$PREVIOUS_TAG..$CI_COMMIT_TAG" | grep -iE "(feat|add|new):" | head -5 || true)
+        CHANGED_COMMITS=$(git log --pretty=format:"- %s" "$PREVIOUS_TAG..$CI_COMMIT_TAG" | grep -iE "(update|change|improve|enhance):" | head -5 || true)
+        FIXED_COMMITS=$(git log --pretty=format:"- %s" "$PREVIOUS_TAG..$CI_COMMIT_TAG" | grep -iE "(fix|bug):" | head -5 || true)
+        OTHER_COMMITS=$(git log --pretty=format:"- %s" "$PREVIOUS_TAG..$CI_COMMIT_TAG" | grep -ivE "(feat|add|new|update|change|improve|enhance|fix|bug):" | head -3 || true)
+        
+        # Add sections if commits exist
+        [[ -n "$ADDED_COMMITS" ]] && echo "### Added" >> changelog_entry.md && echo "" >> changelog_entry.md && echo "$ADDED_COMMITS" >> changelog_entry.md && echo "" >> changelog_entry.md
+        [[ -n "$CHANGED_COMMITS" ]] && echo "### Changed" >> changelog_entry.md && echo "" >> changelog_entry.md && echo "$CHANGED_COMMITS" >> changelog_entry.md && echo "" >> changelog_entry.md
+        [[ -n "$FIXED_COMMITS" ]] && echo "### Fixed" >> changelog_entry.md && echo "" >> changelog_entry.md && echo "$FIXED_COMMITS" >> changelog_entry.md && echo "" >> changelog_entry.md
+        [[ -n "$OTHER_COMMITS" ]] && echo "### Other Changes" >> changelog_entry.md && echo "" >> changelog_entry.md && echo "$OTHER_COMMITS" >> changelog_entry.md && echo "" >> changelog_entry.md
+        
+        # Add bundle size info
+        echo "### Technical" >> changelog_entry.md && echo "" >> changelog_entry.md
+        if [[ -f bundle_report.md ]]; then
+          cat bundle_report.md >> changelog_entry.md
+        else
+          echo "- Bundle size monitoring active" >> changelog_entry.md
+        fi
+        echo "" >> changelog_entry.md
+        
+        # Update CHANGELOG.md
+        if [[ -f CHANGELOG.md ]]; then
+          # Create temp file with new content
+          {
+            head -n 8 CHANGELOG.md  # Keep header and [Unreleased] section
+            echo ""
+            cat changelog_entry.md
+            tail -n +9 CHANGELOG.md | tail -n +2  # Skip the empty line after [Unreleased]
+          } > CHANGELOG_temp.md
+          mv CHANGELOG_temp.md CHANGELOG.md
+          echo "✅ CHANGELOG.md updated with release ${CI_COMMIT_TAG}"
+        fi
+      else
+        echo "⚠️ No previous tag found, creating basic changelog entry"
+        echo "## [${CI_COMMIT_TAG#v}] - $(date +%Y-%m-%d)" > changelog_entry.md
+        echo "" >> changelog_entry.md
+        echo "### Added" >> changelog_entry.md
+        echo "- Initial release" >> changelog_entry.md
+        echo "" >> changelog_entry.md
+      fi
+    # Publish to NPM
+    - |
+      if [[ $CI_COMMIT_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
+        echo "📦 Publishing version ${CI_COMMIT_TAG} to npm..."
+        yarn publish --access public --new-version ${CI_COMMIT_TAG#v}
+      else
+        echo "❌ Invalid tag format: ${CI_COMMIT_TAG}. Expected format: v1.0.0"
+        exit 1
+      fi
+    # Create release notes
+    - |
+      echo "## Release ${CI_COMMIT_TAG}" > release_notes.md
+      if [[ -f changelog_entry.md ]]; then
+        cat changelog_entry.md >> release_notes.md
+      fi
+  artifacts:
+    paths:
+      - release_notes.md
+      - changelog_entry.md
+      - CHANGELOG.md
+    expire_in: 1 month
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+.*$/
+  environment:
+    name: production
+    url: https://www.npmjs.com/package/@zairakai/npm-helpers
+
+# Manual publish (fallback)
 publish:npm:
   <<: *base_job
   stage: publish
-  needs: ['build']
+  needs: ["build"]
   script:
     - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
     - yarn publish --access public
   rules:
-    - if: $CI_COMMIT_TAG
     - when: manual
   environment:
     name: production
-    url: https://www.npmjs.com/package/@zairakai/helpers
+    url: https://www.npmjs.com/package/@zairakai/npm-helpers
 
 # Publish to GitLab Package Registry (as backup)
 publish:gitlab:
   <<: *base_job
   stage: publish
-  needs: ['build']
+  needs: ["build"]
   script:
     - echo "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}" | sed s/^https:// > ~/.npmrc
     - echo "@zairakai:registry=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/" >> ~/.npmrc
@@ -144,31 +285,43 @@ publish:gitlab:
     name: gitlab-registry
     url: ${CI_PROJECT_URL}/-/packages
 
-# Security audit
-audit:
-  <<: *base_job
-  stage: quality
-  needs: ['install']
+# Sync to GitHub (main and develop branches)
+sync:github:
+  stage: deploy
+  image: alpine/git
+  needs: []
+  before_script:
+    - apk add --no-cache git
+    - git config --global user.name "GitLab CI"
+    - git config --global user.email "noreply@gitlab.com"
   script:
-    - yarn audit --level moderate
-  allow_failure: true
-
-# Dependency check for outdated packages
-outdated:
-  <<: *base_job
-  stage: quality
-  needs: ['install']
-  script:
-    - yarn outdated || true
+    - |
+      if [ -n "$GITHUB_TOKEN" ]; then
+        echo "Syncing ${CI_COMMIT_REF_NAME} to GitHub..."
+        git clone --single-branch --branch ${CI_COMMIT_REF_NAME} ${CI_REPOSITORY_URL} repo
+        cd repo
+        git remote add github https://${GITHUB_TOKEN}@github.com/zairakai/npm-helpers.git
+        git push github ${CI_COMMIT_REF_NAME} --force
+        echo "✅ Successfully synced to GitHub"
+      else
+        echo "⚠️ GITHUB_TOKEN not set, skipping GitHub sync"
+      fi
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "main" || $CI_COMMIT_REF_NAME == "develop"'
   allow_failure: true
 
 # Generate and upload documentation (if README changes)
 documentation:
   image: node:$NODE_VERSION-alpine
-  stage: build
-  needs: ['install']
+  stage: metrics
+  needs: ["install"]
   script:
-    - echo "Documentation updated for @zairakai/helpers"
+    - echo "Documentation updated for @zairakai/npm-helpers"
+    - echo "📚 Documentation refreshed" > doc_report.md
+  artifacts:
+    paths:
+      - doc_report.md
+    expire_in: 1 week
   rules:
     - changes:
         - README.md
