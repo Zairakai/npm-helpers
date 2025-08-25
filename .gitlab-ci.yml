@@ -288,7 +288,7 @@ publish:gitlab:
 # Sync to GitHub (main and develop branches)
 sync:github:
   stage: deploy
-  image: alpine/git
+  image: alpine:latest
   needs: []
   before_script:
     - apk add --no-cache git
