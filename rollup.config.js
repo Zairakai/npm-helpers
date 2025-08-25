@@ -7,6 +7,7 @@ const external = [
   'dayjs/plugin/isSameOrAfter',
   'dayjs/plugin/isSameOrBefore',
   'dayjs/plugin/relativeTime',
+  'dayjs/plugin/utc',
 ]
 
 export default [
