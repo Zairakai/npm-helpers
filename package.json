@@ -56,15 +56,19 @@
     "url": "https://gitlab.com/zairakai/npm/helpers.git"
   },
   "scripts": {
-    "build": "rollup -c",
-    "test": "vitest",
+    "build": "tsc && rollup -c",
+    "test": "vitest run",
     "test:coverage": "vitest --coverage",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write .",
     "check": "prettier --check .",
-    "all": "yarn lint && yarn check",
-    "all:fix": "yarn lint:fix && yarn format"
+    "type-check": "tsc --noEmit",
+    "all": "yarn lint && yarn check && yarn type-check && yarn test",
+    "all:fix": "yarn lint:fix && yarn format",
+    "hooks:install": ".githooks/install.sh",
+    "hooks:uninstall": "git config --unset core.hooksPath && rm -f .git/hooks/pre-commit .git/hooks/commit-msg .git/hooks/pre-push",
+    "postinstall": ".githooks/install.sh || true"
   },
   "dependencies": {
     "dayjs": "^1.11.13",
