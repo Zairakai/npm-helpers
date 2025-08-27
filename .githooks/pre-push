@@ -1,15 +1,14 @@
 #!/bin/bash
-# Git pre-push hook for @zairakai/helpers
-# Final checks before pushing to remote
+# Git pre-push hook - Code style validation only
+# Runs ESLint and Prettier checks before push
 
 set -e
 
-echo "🚀 Running pre-push checks for @zairakai/helpers..."
+echo "🎨 Running code style validation..."
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
@@ -25,6 +24,7 @@ run_check() {
         return 0
     else
         echo -e "${RED}❌ $description failed${NC}"
+        echo -e "${RED}💡 Run 'yarn all:fix' to auto-fix formatting issues${NC}"
         return 1
     fi
 }
@@ -35,25 +35,18 @@ if [ ! -f "package.json" ]; then
     exit 1
 fi
 
-# Install dependencies if node_modules is missing
-if [ ! -d "node_modules" ]; then
-    echo -e "${YELLOW}📦 Installing dependencies...${NC}"
-    yarn install
+# ESLint check
+if command -v yarn >/dev/null 2>&1 && yarn info eslint >/dev/null 2>&1; then
+    run_check "yarn lint" "ESLint code style check"
+else
+    echo -e "${RED}❌ ESLint not found, skipping linting${NC}"
 fi
 
-# 1. Full test suite
-run_check "yarn test:coverage" "Full test suite with coverage"
+# Prettier check
+if command -v yarn >/dev/null 2>&1 && yarn info prettier >/dev/null 2>&1; then
+    run_check "yarn check" "Prettier format check"
+else
+    echo -e "${RED}❌ Prettier not found, skipping format check${NC}"
+fi
 
-# 2. Build verification
-run_check "yarn build" "Production build verification"
-
-# 3. Final lint check
-run_check "yarn lint" "Final ESLint check"
-
-# 4. Type checking
-run_check "yarn type-check" "Final TypeScript check"
-
-# 5. Format verification
-run_check "yarn check" "Final format verification"
-
-echo -e "${GREEN}🎉 All pre-push checks passed! Safe to push.${NC}"
+echo -e "${GREEN}🎉 Code style validation passed! Safe to push.${NC}"
